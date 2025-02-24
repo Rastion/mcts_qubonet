@@ -97,9 +97,9 @@ class MCTSNeuralOptimizer(BaseOptimizer):
         for _ in range(self.rollout_depth):
             cost = self.calculate_cost(current_state, qubo_matrix)
             if cost < node.cost:
-                return -cost  # Negative because lower cost is better
+                return cost  # Negative because lower cost is better
             current_state = self.random_flip(current_state)
-        return -self.calculate_cost(current_state, qubo_matrix)
+        return self.calculate_cost(current_state, qubo_matrix)
 
     def backpropagate(self, node, value):
         while node is not None:
@@ -125,8 +125,7 @@ class MCTSNeuralOptimizer(BaseOptimizer):
         qubo_matrix = np.zeros((n, n))
         for (i, j), coeff in QUBO_dict.items():
             qubo_matrix[i][j] = coeff
-            if i != j:
-                qubo_matrix[j][i] = coeff
+            
                 
         # Initialize model and root
         self.initialize_model(n)
@@ -137,7 +136,7 @@ class MCTSNeuralOptimizer(BaseOptimizer):
         best_solution = root_state.copy()
         best_cost = root.cost
         start_time = time.time()
-        
+        print(f"RR {root.cost}")
         for sim in range(self.num_simulations):
             if time.time() - start_time > self.time_limit:
                 break

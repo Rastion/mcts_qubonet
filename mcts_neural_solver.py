@@ -40,7 +40,7 @@ class QUBONet(nn.Module):
         return self.policy_head(features), self.value_head(features)
 
 class MCTSNeuralOptimizer(BaseOptimizer):
-    def __init__(self, config_file="mcts_config.json"):
+    def __init__(self, config_file="solver_config.json"):
         super().__init__()
         self.config = self.load_config(config_file)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

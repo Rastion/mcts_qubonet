@@ -1,0 +1,69 @@
+{
+    "entry_point": "mcts_neural_solver:MCTSNeuralOptimizer",
+    "default_params": {
+      "num_simulations": 1000,
+      "exploration_c": 1.41,
+      "rollout_depth": 20,
+      "hidden_size": 128,
+      "learning_rate": 0.001,
+      "weight_decay": 0.0001,
+      "time_limit": 60,
+      "train_interval": 50,
+      "verbose": false
+    },
+    "optimizer_type": "Neural-guided MCTS QUBO optimizer",
+    "description": "Monte Carlo Tree Search with neural network guidance for QUBO optimization. Combines classical MCTS with deep learning for adaptive exploration-exploitation balance.",
+    "compatible_problems": [
+      "QUBO"
+    ],
+    "parameters": {
+      "num_simulations": {
+        "type": "int",
+        "description": "Maximum number of MCTS simulations to run."
+      },
+      "exploration_c": {
+        "type": "float",
+        "description": "Exploration constant for UCB formula (controls exploration-exploitation balance)."
+      },
+      "rollout_depth": {
+        "type": "int",
+        "description": "Depth of random rollouts during simulation phase."
+      },
+      "hidden_size": {
+        "type": "int",
+        "description": "Number of neurons in hidden layer of the neural network."
+      },
+      "learning_rate": {
+        "type": "float",
+        "description": "Learning rate for neural network optimizer."
+      },
+      "weight_decay": {
+        "type": "float",
+        "description": "L2 regularization strength for neural network training."
+      },
+      "time_limit": {
+        "type": "int",
+        "description": "Maximum optimization time in seconds."
+      },
+      "train_interval": {
+        "type": "int",
+        "description": "Number of simulations between neural network updates."
+      },
+      "verbose": {
+        "type": "bool",
+        "description": "True to show detailed optimization progress."
+      }
+    },
+    "requirements": [
+      "torch",
+      "qubots",
+      "numpy"
+    ],
+    "keywords": [
+      "QUBO",
+      "MCTS",
+      "neural guidance",
+      "tree search",
+      "hybrid AI"
+    ]
+}

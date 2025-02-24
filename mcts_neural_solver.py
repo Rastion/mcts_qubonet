@@ -1,5 +1,4 @@
 import json
-import time
 import math
 import numpy as np
 import torch
@@ -40,7 +39,7 @@ class QUBONet(nn.Module):
         return self.policy_head(features), self.value_head(features)
 
 class MCTSNeuralOptimizer(BaseOptimizer):
-    def __init__(self, num_simulations, exploration_c, rollout_depth, hidden_size, learning_rate, weight_decay, time_limit, train_interval, verbose):
+    def __init__(self, num_simulations, exploration_c, rollout_depth, hidden_size, learning_rate, weight_decay, train_interval, verbose):
         super().__init__()
         self.num_simulations = num_simulations
         self.exploration_c = exploration_c
@@ -48,7 +47,6 @@ class MCTSNeuralOptimizer(BaseOptimizer):
         self.hidden_size = hidden_size
         self.learning_rate = learning_rate
         self.weight_decay = weight_decay
-        self.time_limit = time_limit
         self.train_interval = train_interval
         self.verbose = verbose
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -149,11 +147,8 @@ class MCTSNeuralOptimizer(BaseOptimizer):
         
         best_solution = root_state.copy()
         best_cost = root.cost
-        start_time = time.time()
         print(f"RR {root.cost}")
         for sim in range(self.num_simulations):
-            if time.time() - start_time > self.time_limit:
-                break
                 
             node = root
             # Selection

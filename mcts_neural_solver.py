@@ -40,24 +40,28 @@ class QUBONet(nn.Module):
         return self.policy_head(features), self.value_head(features)
 
 class MCTSNeuralOptimizer(BaseOptimizer):
-    def __init__(self, config_file="solver_config.json"):
+    def __init__(self, num_simulations, exploration_c, rollout_depth, hidden_size, learning_rate, weight_decay, time_limit, train_interval, verbose):
         super().__init__()
-        self.config = self.load_config(config_file)
+        self.num_simulations = num_simulations
+        self.exploration_c = exploration_c
+        self.rollout_depth = rollout_depth
+        self.hidden_size = hidden_size
+        self.learning_rate = learning_rate
+        self.weight_decay = weight_decay
+        self.time_limit = time_limit
+        self.train_interval = train_interval
+        self.verbose = verbose
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.model = None
         self.optimizer = None
 
-    def load_config(self, config_file):
-        with open(Path(__file__).parent / config_file, 'r') as f:
-            return json.load(f)
-
     def initialize_model(self, n):
         """Initialize network for problem size n"""
-        self.model = QUBONet(n, self.config["hidden_size"]).to(self.device)
+        self.model = QUBONet(n, self.hidden_size).to(self.device)
         self.optimizer = torch.optim.Adam(
             self.model.parameters(), 
-            lr=self.config["learning_rate"],
-            weight_decay=self.config["weight_decay"]
+            lr=self.learning_rate,
+            weight_decay=self.weight_decay
         )
 
     def ucb_score(self, node, child):
@@ -66,7 +70,7 @@ class MCTSNeuralOptimizer(BaseOptimizer):
         else:
             q_value = child.value_sum / child.visit_count
             
-        return q_value + self.config["exploration_c"] * child.prior * math.sqrt(node.visit_count) / (child.visit_count + 1)
+        return q_value + self.exploration_c * child.prior * math.sqrt(node.visit_count) / (child.visit_count + 1)
 
     def select_child(self, node):
         return max(node.children, key=lambda child: self.ucb_score(node, child))
@@ -90,7 +94,7 @@ class MCTSNeuralOptimizer(BaseOptimizer):
 
     def simulate(self, node, qubo_matrix):
         current_state = node.state.copy()
-        for _ in range(self.config["rollout_depth"]):
+        for _ in range(self.rollout_depth):
             cost = self.calculate_cost(current_state, qubo_matrix)
             if cost < node.cost:
                 return -cost  # Negative because lower cost is better
@@ -134,8 +138,8 @@ class MCTSNeuralOptimizer(BaseOptimizer):
         best_cost = root.cost
         start_time = time.time()
         
-        for sim in range(self.config["num_simulations"]):
-            if time.time() - start_time > self.config["time_limit"]:
+        for sim in range(self.num_simulations):
+            if time.time() - start_time > self.time_limit:
                 break
                 
             node = root
@@ -161,7 +165,7 @@ class MCTSNeuralOptimizer(BaseOptimizer):
                 best_solution = node.state
                 
             # Train network
-            if sim % self.config["train_interval"] == 0:
+            if sim % self.train_interval == 0:
                 self.train_network(root, qubo_matrix)
                 
         return best_solution.tolist(), float(best_cost)

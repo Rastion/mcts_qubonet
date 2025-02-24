@@ -9,7 +9,7 @@
       "weight_decay": 0.0001,
       "time_limit": 60,
       "train_interval": 50,
-      "verbose": false
+      "verbose": true
     },
     "optimizer_type": "Neural-guided MCTS QUBO optimizer",
     "description": "Monte Carlo Tree Search with neural network guidance for QUBO optimization. Combines classical MCTS with deep learning for adaptive exploration-exploitation balance.",

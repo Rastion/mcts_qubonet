@@ -158,7 +158,7 @@ class MCTSNeuralOptimizer(BaseOptimizer):
             
             # Backpropagation
             self.backpropagate(node, value)
-            
+            print(node.cost)
             # Update best solution
             if node.cost < best_cost:
                 best_cost = node.cost

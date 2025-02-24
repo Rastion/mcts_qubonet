@@ -79,27 +79,41 @@ class MCTSNeuralOptimizer(BaseOptimizer):
         with torch.no_grad():
             state_tensor = torch.FloatTensor(node.state).to(self.device)
             policy, value = self.model(state_tensor)
-            
-        # Generate possible children
+        
+        policy_probs = policy.cpu().numpy()
+        selected_bits = []
+        
+        # Select bits using policy probabilities
         for bit in range(len(node.state)):
-            if np.random.rand() < policy[bit].item():
-                new_state = node.state.copy()
-                new_state[bit] = 1 - new_state[bit]
-                child = MCTSNode(new_state, parent=node)
-                child.prior = policy[bit].item()
-                child.cost = self.calculate_cost(new_state, qubo_matrix)
-                node.children.append(child)
-                
-        return node.children[0] if node.children else None
+            if np.random.rand() < policy_probs[bit]:
+                selected_bits.append(bit)
+        
+        # Ensure at least one child is generated
+        if not selected_bits:
+            selected_bits = [np.argmax(policy_probs)]
+        
+        # Create children
+        children = []
+        for bit in selected_bits:
+            new_state = node.state.copy()
+            new_state[bit] = 1 - new_state[bit]
+            child = MCTSNode(new_state, parent=node)
+            child.prior = policy_probs[bit]
+            child.cost = self.calculate_cost(new_state, qubo_matrix)
+            children.append(child)
+        
+        node.children.extend(children)
+        return children[0]  # Return first child for simulation
 
     def simulate(self, node, qubo_matrix):
         current_state = node.state.copy()
+        best_cost = node.cost
         for _ in range(self.rollout_depth):
-            cost = self.calculate_cost(current_state, qubo_matrix)
-            if cost < node.cost:
-                return cost  # Negative because lower cost is better
             current_state = self.random_flip(current_state)
-        return self.calculate_cost(current_state, qubo_matrix)
+            current_cost = self.calculate_cost(current_state, qubo_matrix)
+            if current_cost < best_cost:
+                best_cost = current_cost
+        return -best_cost  # Return negative cost as reward
 
     def backpropagate(self, node, value):
         while node is not None:

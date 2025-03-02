@@ -63,7 +63,7 @@
     "keywords": [
       "QUBO",
       "MCTS",
-      "neural guidance",
+      "heuristic",
       "tree search",
       "hybrid AI"
     ]

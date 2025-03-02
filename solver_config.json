@@ -10,7 +10,9 @@
       "train_interval": 50,
       "verbose": true
     },
-    "optimizer_type": "Neural-guided MCTS QUBO optimizer",
+    "creator": "Rastion",
+    "type": "optimizer",
+    "optimizer_name": "Neural-guided MCTS QUBO optimizer",
     "description": "Monte Carlo Tree Search with neural network guidance for QUBO optimization. Combines classical MCTS with deep learning for adaptive exploration-exploitation balance.",
     "compatible_problems": [
       "QUBO"
